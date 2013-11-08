@@ -1,13 +1,13 @@
 perl-git-prompt
 ===============
 
-Git extension to show your git branch and changeset status in your the prompt.
+Git extension to show your git branch and changeset status in your prompt.
 
 Put the following in your `~/.bashrc`
 
 ~~~bash
 # Add the git status to the existing bash prompt
-export PS1="\$(/dir/to/git-prompt.pl)"$PS1
+export PS1="\$(~/perl-git-prompt/git-prompt.pl)"$PS1
 ~~~
 
 Example:
