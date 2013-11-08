@@ -71,7 +71,9 @@ if ($i) {
 		}
 
 		# If there are pending files to be committed
-		if ($i->{'dirty'}) {
+		if ($i->{'dirty'} == $i->{'staged'}) {
+			print $CLEAN_COLOR . $i->{'dirty'};
+		} elsif ($i->{'dirty'}) {
 			print $PENDING_COLOR . $i->{'dirty'};
 		}
 
