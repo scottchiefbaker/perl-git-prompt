@@ -1,5 +1,15 @@
 #!/usr/bin/perl
 
+################################################################
+# Git status in your bash prompt
+# https://github.com/scottchiefbaker/perl-git-prompt.git
+# 
+# Version 0.1
+#
+# Put this in your ~/.bashrc to show git status in your prompt: 
+# export PS1="\$(~/git-prompt/git-prompt.pl)"$PS1
+################################################################
+
 use strict;
 
 my $PAREN_COLOR   = color(15);  # Color of the parenthesis
