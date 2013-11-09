@@ -36,7 +36,7 @@ if ($args =~ /--json/) {
 }
 
 # If we're on a git enabled dir
-if ($i) {
+if ($i && $i->{'branch'}) {
 	print $PROMPT_COLOR . "Git Branch: ";
 
 	my $branch_color = '';
@@ -114,7 +114,7 @@ sub get_git_info {
 	my $ret = {};
 
 	# Git status has all the data we'll need to get the parts
-	my $cmd = "git status";
+	my $cmd = "2>/dev/null git status";
 	my $out = `$cmd`;
 
 	# Find the branch we're on
