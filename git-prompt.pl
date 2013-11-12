@@ -167,6 +167,8 @@ sub get_git_info {
 		# Files gits sees but isn't tracking
 		} elsif ($line =~ /Untracked files:/) {
 			$state = "untracked";
+		} elsif ($line =~ /Unmerged paths:/) {
+			$state = "unmerged";
 		# If the line has a \t in it, it's a file name
 		} elsif ($line =~ /\t/) {
 			$ret->{$state}++;
