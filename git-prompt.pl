@@ -32,16 +32,14 @@ my $i = get_git_info();
 # If the user requests debug dump out the data structure
 if ($args =~ /--debug/) {
 	require Data::Dump::Color;
-	Data::Dump::Color->import();
-	dd($i);
+	Data::Dump::Color::dd($i);
 	exit;
 }
 
 # If they request JSON spit that out
 if ($args =~ /--json/) {
 	require JSON;
-	JSON->import();
-	print encode_json($i) . "\n";
+	print JSON::encode_json($i) . "\n";
 	exit;
 }
 
