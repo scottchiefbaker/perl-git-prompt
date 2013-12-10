@@ -1,30 +1,39 @@
 #!/usr/bin/perl
 
 use strict;
-#use Term::ReadKey;
-#my ($cols,$rows) = GetTerminalSize();
 
-my $cols = 120;
-my $rows = 24;
-if (-f '/bin/stty') {
-	($rows,$cols) = split(/ /,`/bin/stty size`);
-}
+my $args  = join(" ",@ARGV);
+my ($raw) = $args =~ /--raw/;
 
-for (my $i=0;$i<256;$i++) {
+# Term::ANSIColor didn't get 256 color constants until 4.0
+if (!$raw && has_term_ansicolor(4.0)) { 
+	require Term::ANSIColor;
+	Term::ANSIColor->import(':constants','color','uncolor');
 
-	print set_bcolor($i); # Set the background color
+	#print "TERM::ANSIColor constant names:\n";
+	term_ansicolor();
+} else {
+	my $cols = 120;
+	my $rows = 24;
+	if (-f '/bin/stty') {
+		($rows,$cols) = split(/ /,`/bin/stty size`);
+	}
 
-	print set_fcolor(15); # White
-	printf("  %03d",$i); # Ouput the color number in white
-	print set_fcolor(0); # Black
-	printf(" %03d  ",$i); # Ouput the color number in black
+	for (my $i=0;$i<256;$i++) {
+		print set_bcolor($i); # Set the background color
 
-	print set_fcolor(); # Reset both colors
-	print " "; # Seperators
+		print set_fcolor(15); # White
+		printf("  %03d",$i); # Ouput the color number in white
+		print set_fcolor(0); # Black
+		printf(" %03d  ",$i); # Ouput the color number in black
 
-	if (($i + 1) % int($cols / 12) == 0) { 
-		print set_bcolor(); # Reset
-		print "\n"; 
+		print set_fcolor(); # Reset both colors
+		print " "; # Seperators
+
+		if (($i + 1) % int($cols / 12) == 0) { 
+			print set_bcolor(); # Reset
+			print "\n"; 
+		}
 	}
 }
 
@@ -33,9 +42,24 @@ END {
 	print "\n";
 }
 
-#print highlight_string('for','Thanks for viewing');
-
 #################################################################################
+
+sub has_term_ansicolor {
+	my $version = shift();
+	$version ||= 4;
+
+	eval { 
+		# Check if we have Term::ANSIColor version 4.0
+		require Term::ANSIColor;
+		Term::ANSIColor->VERSION($version);
+	};
+
+	if ($@) {
+		return 0;
+	} else {
+		return 1;
+	}
+}
 
 sub set_fcolor {
 	my $c = shift();
@@ -68,4 +92,90 @@ sub highlight_string {
 	$haystack =~ s/$needle/$fc.$needle.$reset/e;
 
 	return $haystack;
+}
+
+sub get_color_mapping {
+	my $map = {};
+
+	for (my $i = 0; $i < 256; $i++) {
+		my $str = "\e[38;5;${i}m";
+		my ($acc) = uncolor($str);
+
+		$map->{$acc} = int($i);
+	}
+
+	return $map;
+}
+
+sub term_ansicolor {
+	my @colors = get_color_names();
+	my $map    = get_color_mapping();
+
+	my $absolute = 0;
+	my $group    = 0;
+	foreach my $name (@colors) { 
+		my $bg       = "on_$name";
+		my $map_num  = int($map->{$name});
+		my $raw_ansi = sprintf("#%03i",$map_num);
+
+		print color('bright_white');
+		printf("%7s ",$name);
+
+		if (needs_white($map_num)) {
+			print color($bg) . "  " . color('bright_white') . $raw_ansi . "  ";
+		} else {
+			print color($bg) . "  " . color("black") . $raw_ansi . "  ";
+		}
+		print color('reset');
+
+		$absolute++;
+		$group++;
+
+		if ($absolute == 16 || $absolute == 40) {
+			print "\n\n";
+			$group = 0;
+		} elsif ($group % 6 == 0) {
+			print "\n";
+		}
+	}
+}
+
+sub get_color_names {
+	my @colors    = ();
+	my ($r,$g,$b) = 0;
+
+	for (my $i = 0; $i < 16; $i++) {
+		my $name = "ansi$i";
+		push(@colors,$name);
+	}
+
+	for (my $i = 0; $i < 24; $i++) {
+		my $name = "grey$i";
+		push(@colors,$name);
+	}
+
+	for ($r = 0; $r <= 5; $r++) {
+		for ($g = 0; $g <= 5; $g++) {
+			for ($b = 0; $b <= 5; $b++) {
+				my $name = "rgb$r$g$b";
+				push(@colors,$name);
+			}
+		}
+	}
+
+	return @colors;
+}
+
+sub needs_white {
+	my $num = shift();
+
+	# Sorta lame, but it's a hard coded list of which background colors need a white foreground
+	my @white = qw(0 1 4 5 8 232 233 234 235 236 237 238 239 240 241 242 243 16 17 18 
+	19 20 21 22 28 52 53 54 55 25 56 57 58 59 60 88 89 90 91 92 93 124 125 29 30 31 26 27 61 62 64);
+
+	if (grep(/$num/,@white)) {
+		return 1,
+	} else {
+		return 0;
+	}
 }
