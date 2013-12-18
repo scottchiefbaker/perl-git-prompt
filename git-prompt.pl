@@ -29,20 +29,20 @@ my $RESET_COLOR   = color();    # Reset the color
 ###################################################################
 
 # A string of all the args passed in
-my $args = join(" ",@ARGV);
+my $args = argv();
 
 # Get the state of git in the current dir
 my $i = get_git_info();
 
 # If the user requests debug dump out the data structure
-if ($args =~ /--debug/) {
+if ($args->{debug}) {
 	require Data::Dump::Color;
 	Data::Dump::Color::dd($i);
 	exit;
 }
 
 # If they request JSON spit that out
-if ($args =~ /--json/) {
+if ($args->{json}) {
 	require JSON;
 	print JSON::encode_json($i) . "\n";
 	exit;
@@ -193,6 +193,26 @@ sub get_git_info {
 		} elsif ($line =~ /\t/) {
 			$ret->{$state}++;
 			$ret->{'dirty'}++;
+		}
+	}
+
+	return $ret;
+}
+
+sub argv {
+	my @args = @_ || @ARGV;
+	my $ret = {};
+
+	for (my $i = 0; $i < scalar(@args); $i++) {
+		# If the item starts with "-" it's a key
+		if (my ($key) = $args[$i] =~ /^--?(\S+)/) {
+			# If the next item does not start with "--" it's the value for this item
+			if (defined($args[$i + 1]) && ($args[$i + 1] !~ /^--?/)) {
+				$ret->{$key} = $args[$i + 1];
+				# Bareword like --verbose with no options
+			} else {
+				$ret->{$key}++;
+			}
 		}
 	}
 
