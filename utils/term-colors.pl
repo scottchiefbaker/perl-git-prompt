@@ -32,7 +32,7 @@ if (!$raw && has_term_ansicolor(4.0)) {
 		}
 
 		print set_fcolor(); # Reset both colors
-		print " "; # Seperators
+		print "  "; # Seperators
 
 		if ($i == 15 || $i == 231) {
 			print set_bcolor(); # Reset
@@ -181,9 +181,10 @@ sub needs_white {
 
 	# Sorta lame, but it's a hard coded list of which background colors need a white foreground
 	my @white = qw(0 1 4 5 8 232 233 234 235 236 237 238 239 240 241 242 243 16 17 18 
-	19 20 21 22 28 52 53 54 55 25 56 57 58 59 60 88 89 90 91 92 93 124 125 29 30 31 26 27 61 62 64);
+	19 20 21 22 28 52 53 54 55 25 56 57 58 59 60 88 89 90 91 92 93 124 125 29 30 31 26 
+	27 61 62 64 160 196 161 126 63 94 95 100 101 127 128 129 12 130 131 23 24);
 
-	if (grep(/$num/,@white)) {
+	if (grep(/\b$num\b/,@white)) {
 		return 1,
 	} else {
 		return 0;
