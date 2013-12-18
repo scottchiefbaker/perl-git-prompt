@@ -19,21 +19,28 @@ if (!$raw && has_term_ansicolor(4.0)) {
 		($rows,$cols) = split(/ /,`/bin/stty size`);
 	}
 
+	my $section = 1;
 	for (my $i=0;$i<256;$i++) {
 		print set_bcolor($i); # Set the background color
 
 		print set_fcolor(15); # White
-		printf("  %03d",$i); # Ouput the color number in white
+		printf("   %03d",$i); # Ouput the color number in white
 		print set_fcolor(0); # Black
-		printf(" %03d  ",$i); # Ouput the color number in black
+		printf("  %03d   ",$i); # Ouput the color number in black
 
 		print set_fcolor(); # Reset both colors
 		print " "; # Seperators
 
-		if (($i + 1) % int($cols / 12) == 0) { 
+		if ($i == 15 || $i == 231) {
+			print set_bcolor(); # Reset
+			print "\n\n"; 
+			$section = 0;
+		} elsif ($section > 0 && ($section % 6 == 0)) {
 			print set_bcolor(); # Reset
 			print "\n"; 
 		}
+
+		$section++;
 	}
 }
 
