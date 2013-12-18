@@ -103,11 +103,18 @@ sub color {
 
 	my $ret = '';
 
-	if ($bold) { $ret = "\e[1m"; }
-	else { $ret = "\e[0m"; }
+	if ($bold eq 'bold') {
+		$ret = "\e[1m";
+	} else {
+		$ret = "\e[0m";
+	}
 
-	if (!defined($c)) { $ret .= "\e[0m"; } # Reset the color
-	else { $ret .= "\e[38;5;${c}m"; }
+	# Reset the color
+	if (!defined($c)) {
+		$ret = "\e[0m";
+	} else {
+		$ret .= "\e[38;5;${c}m";
+	}
 
 	return $ret;
 }
@@ -119,14 +126,19 @@ sub is_git_dir {
 	my $cmd = "git branch 2>&1 > /dev/null";
 	`$cmd`;
 
-	# Check the exit status to see if we're in a git dir
-	if ($? != 0) { return 0; }
-	else { return 1; }
+	# If the exit code is 0 we're in a git enabled dir
+	if ($? == 0) {
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
 sub get_git_info {
 	# See if we're in a git enabled dir
-	if (!is_git_dir()) { return 0; }
+	if (!is_git_dir()) {
+		return 0;
+	}
 
 	my $ret = {};
 
