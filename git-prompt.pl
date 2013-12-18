@@ -15,6 +15,7 @@ use strict;
 #      1      2  3   2 4 5 6 4
 # Git Branch: (master) [+2 14]
 
+# Color codes found in utils/term-colors.pl
 my $PROMPT_COLOR  = color(45);  # Color of the header prompt                     #1
 my $PAREN_COLOR   = color(15);  # Color of the parenthesis                       #2
 my $DIRTY_COLOR   = color(203); # Color when the branch is dirty                 #3
