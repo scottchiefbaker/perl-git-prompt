@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 
+use strict;
+
 ################################################################
 # Git status in your bash prompt
 # https://github.com/scottchiefbaker/perl-git-prompt.git
@@ -10,15 +12,17 @@
 # export PS1="\$(~/git-prompt/git-prompt.pl)"$PS1
 ################################################################
 
-use strict;
+#      1      2  3   2 4 5 6 4
+# Git Branch: (master) [+2 14]
 
-my $PAREN_COLOR   = color(15);  # Color of the parenthesis
-my $DIRTY_COLOR   = color(203); # Color when the branch is dirty
-my $CLEAN_COLOR   = color(83);  # Color when the branch is clean
-my $PROMPT_COLOR  = color(45);  # Color of the header prompt
-my $AHEAD_COLOR   = color(117); # Color when the branch is ahead of the remote
-my $BEHIND_COLOR  = color(196); # Color when the branch is behind of the remote
-my $PENDING_COLOR = color(11);  # Color of the uncommitted file count
+my $PROMPT_COLOR  = color(45);  # Color of the header prompt                     #1
+my $PAREN_COLOR   = color(15);  # Color of the parenthesis                       #2
+my $DIRTY_COLOR   = color(203); # Color when the branch is dirty                 #3
+my $CLEAN_COLOR   = color(83);  # Color when the branch is clean                 #3
+my $BRACE_COLOR   = color(15);  # Color when the branch is clean                 #4
+my $AHEAD_COLOR   = color(117); # Color when the branch is ahead of the remote   #5
+my $BEHIND_COLOR  = color(196); # Color when the branch is behind of the remote  #5
+my $PENDING_COLOR = color(11);  # Color of the uncommitted file count            #6
 my $RESET_COLOR   = color();    # Reset the color
 
 ###################################################################
@@ -61,7 +65,7 @@ if ($i && $i->{'branch'}) {
 	# If we're ahead/behind of the remote OR there are pending files
 	if ($i->{'position'} || $i->{'dirty'}) {
 		# Open paren
-		print $PAREN_COLOR . "[";
+		print $BRACE_COLOR . "[";
 
 		# Ahead/Behind of the remote server
 		if ($i->{'position'}) {
@@ -86,7 +90,7 @@ if ($i && $i->{'branch'}) {
 		}
 
 		# Close paren
-		print $PAREN_COLOR . "]";
+		print $BRACE_COLOR . "]";
 	}
 
 	print "\n" . $RESET_COLOR;
