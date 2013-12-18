@@ -23,10 +23,13 @@ if (!$raw && has_term_ansicolor(4.0)) {
 	for (my $i=0;$i<256;$i++) {
 		print set_bcolor($i); # Set the background color
 
-		print set_fcolor(15); # White
-		printf("   %03d",$i); # Ouput the color number in white
-		print set_fcolor(0); # Black
-		printf("  %03d   ",$i); # Ouput the color number in black
+		if (needs_white($i)) {
+			print set_fcolor(15); # White
+			printf("    %03d    ",$i); # Ouput the color number in white
+		} else {
+			print set_fcolor(0); # Black
+			printf("    %03d    ",$i); # Ouput the color number in black
+		}
 
 		print set_fcolor(); # Reset both colors
 		print " "; # Seperators
