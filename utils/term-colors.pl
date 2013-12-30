@@ -141,7 +141,7 @@ sub term_ansicolor {
 		$absolute++;
 		$group++;
 
-		if ($absolute == 16 || $absolute == 40) {
+		if ($absolute == 16 || $absolute == 232) {
 			print "\n\n";
 			$group = 0;
 		} elsif ($group % 6 == 0) {
@@ -159,11 +159,6 @@ sub get_color_names {
 		push(@colors,$name);
 	}
 
-	for (my $i = 0; $i < 24; $i++) {
-		my $name = "grey$i";
-		push(@colors,$name);
-	}
-
 	for ($r = 0; $r <= 5; $r++) {
 		for ($g = 0; $g <= 5; $g++) {
 			for ($b = 0; $b <= 5; $b++) {
@@ -171,6 +166,11 @@ sub get_color_names {
 				push(@colors,$name);
 			}
 		}
+	}
+
+	for (my $i = 0; $i < 24; $i++) {
+		my $name = "grey$i";
+		push(@colors,$name);
 	}
 
 	return @colors;
