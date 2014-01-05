@@ -9,7 +9,11 @@ use strict;
 # Version 0.2
 #
 # Put this in your ~/.bashrc to show git status in your prompt:
-# export PS1="\$(~/git-prompt/git-prompt.pl)"$PS1
+#
+# GIT_PROMPT="$HOME/github/perl-git-prompt/git-prompt.pl"
+# if [[ -f $GIT_PROMPT ]]; then
+# 	export PS1="\$($GIT_PROMPT)"$PS1
+# fi
 ################################################################
 
 #      1      2  3   2 4 5 6 4
