@@ -6,7 +6,7 @@ my $args  = join(" ",@ARGV);
 my ($raw) = $args =~ /--raw/;
 
 # Term::ANSIColor didn't get 256 color constants until 4.0
-if (!$raw && has_term_ansicolor(4.0)) { 
+if (!$raw && has_term_ansicolor(4.0)) {
 	require Term::ANSIColor;
 	Term::ANSIColor->import(':constants','color','uncolor');
 
@@ -36,11 +36,11 @@ if (!$raw && has_term_ansicolor(4.0)) {
 
 		if ($i == 15 || $i == 231) {
 			print set_bcolor(); # Reset
-			print "\n\n"; 
+			print "\n\n";
 			$section = 0;
 		} elsif ($section > 0 && ($section % 6 == 0)) {
 			print set_bcolor(); # Reset
-			print "\n"; 
+			print "\n";
 		}
 
 		$section++;
@@ -58,7 +58,7 @@ sub has_term_ansicolor {
 	my $version = shift();
 	$version ||= 4;
 
-	eval { 
+	eval {
 		# Check if we have Term::ANSIColor version 4.0
 		require Term::ANSIColor;
 		Term::ANSIColor->VERSION($version);
@@ -123,7 +123,7 @@ sub term_ansicolor {
 
 	my $absolute = 0;
 	my $group    = 0;
-	foreach my $name (@colors) { 
+	foreach my $name (@colors) {
 		my $bg       = "on_$name";
 		my $map_num  = int($map->{$name});
 		my $raw_ansi = sprintf("#%03i",$map_num);
@@ -180,8 +180,8 @@ sub needs_white {
 	my $num = shift();
 
 	# Sorta lame, but it's a hard coded list of which background colors need a white foreground
-	my @white = qw(0 1 4 5 8 232 233 234 235 236 237 238 239 240 241 242 243 16 17 18 
-	19 20 21 22 28 52 53 54 55 25 56 57 58 59 60 88 89 90 91 92 93 124 125 29 30 31 26 
+	my @white = qw(0 1 4 5 8 232 233 234 235 236 237 238 239 240 241 242 243 16 17 18
+	19 20 21 22 28 52 53 54 55 25 56 57 58 59 60 88 89 90 91 92 93 124 125 29 30 31 26
 	27 61 62 64 160 196 161 126 63 94 95 100 101 127 128 129 12 130 131 23 24);
 
 	if (grep(/\b$num\b/,@white)) {

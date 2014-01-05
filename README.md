@@ -17,7 +17,7 @@ Example:
 --------
 ~~~
 Git Branch: (master) [+1 5]
-bash$ 
+bash$
 ~~~
 
 * You are on the **master** branch.
@@ -26,6 +26,6 @@ bash$
 
 Note:
 -----
-This script assumes you have 256 color terminal support. It's 2013, you 
+This script assumes you have 256 color terminal support. It's 2013, you
 should have a 256 color terminal. If you still have a 16 color terminal
 no guarantees how this will look.
