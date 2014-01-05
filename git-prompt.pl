@@ -32,11 +32,11 @@ my $RESET_COLOR   = color();    # Reset the color
 
 ###################################################################
 
-# A string of all the args passed in
-my $args = argv();
-
 # Get the state of git in the current dir
 my $i = get_git_info();
+
+# A string of all the args passed in
+my $args = argv();
 
 # If the user requests debug dump out the data structure
 if ($args->{debug}) {
@@ -160,16 +160,16 @@ sub get_git_info {
 
 	#Your branch is behind 'origin/vader' by 2 commits
 	if ($out =~ /Your branch is (ahead|behind).*'(.+?)' by (\d+) commit/) {
-		my $arrow = "?";
+		my $sigil = "?";
 		if ($1 eq 'ahead') {
-			$arrow = "+";
+			$sigil = "+";
 			$ret->{'ahead'} = 1;
 		} elsif ($1 eq 'behind') {
-			$arrow = "-";
+			$sigil = "-";
 			$ret->{'behind'} = 1;
 		}
 
-		my $str = "${arrow}$3";
+		my $str = "${sigil}$3";
 		$ret->{'position'} = $str;
 	}
 
