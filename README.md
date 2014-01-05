@@ -7,7 +7,10 @@ Put the following in your `~/.bashrc`
 
 ~~~bash
 # Add git status to the existing bash prompt
-export PS1="\$(~/perl-git-prompt/git-prompt.pl)"$PS1
+GIT_PROMPT="$HOME/github/perl-git-prompt/git-prompt.pl"
+if [[ -f $GIT_PROMPT ]]; then
+	export PS1="\$($GIT_PROMPT)"$PS1
+fi
 ~~~
 
 Example:
