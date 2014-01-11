@@ -13,16 +13,19 @@ if [[ -f $GIT_PROMPT ]]; then
 fi
 ~~~
 
-Example:
---------
-~~~
-Git Branch: (master) [+1 5]
-bash$
-~~~
+Examples:
+---------
+![Example Prompt](http://www.perturb.org/images/git-prompt-1.png)
 
-* You are on the **master** branch.
+* You are on the **vader** branch.
 * Your local repo is **+1** commit ahead of the remote
 * There are **5** files in the staging area
+
+![Example Prompt](http://www.perturb.org/images/git-prompt-2.png)
+
+* You are on the **vader** branch.
+* Your local repo is on the same commit at the remote
+* There are no files in the staging area
 
 Note:
 -----
