@@ -88,11 +88,20 @@ if ($i && $i->{'branch'}) {
 		}
 
 		# If there are pending files to be committed
-		if ($i->{'dirty'} == $i->{'staged'}) {
-			print $CLEAN_COLOR . $i->{'dirty'};
-		} elsif ($i->{'dirty'}) {
-			print $PENDING_COLOR . $i->{'dirty'};
+		#
+		# If none of the files are staged
+		if (($i->{'dirty'} >= 1) && ($i->{'staged'} == 0)) {
+			print $DIRTY_COLOR;
+		# If all the files are staged
+		} elsif ($i->{'dirty'} == $i->{'staged'}) {
+			print $CLEAN_COLOR;
+		# If some of the files are staged (but not all)
+		} elsif (($i->{'dirty'} >= 0) && ($i->{'staged'} >= 0)) {
+			print $PENDING_COLOR;
 		}
+
+		# Print out the number of dirty files
+		print $i->{'dirty'};
 
 		# Close paren
 		print $BRACE_COLOR . "]";
