@@ -163,7 +163,7 @@ sub get_git_info {
 	# Find the branch we're on
 	if ($out =~ /On branch (.+?)\n/) {
 		$ret->{'branch'} = $1;
-	} elsif ($out =~ /Not currently on any branch|HEAD detached at/) {
+	} elsif ($out =~ /Not currently on any branch|HEAD detached (at|from)/) {
 		$ret->{'branch'} = "DETACHED_HEAD";
 	}
 
