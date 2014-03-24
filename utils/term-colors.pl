@@ -19,7 +19,9 @@ if (!$raw && has_term_ansicolor(4.0)) {
 		($rows,$cols) = split(/ /,`/bin/stty size`);
 	}
 
-	my $section = 1;
+	my $section  = 1;
+	my $grouping = 8;
+
 	for (my $i=0;$i<256;$i++) {
 		print set_bcolor($i); # Set the background color
 
@@ -37,8 +39,9 @@ if (!$raw && has_term_ansicolor(4.0)) {
 		if ($i == 15 || $i == 231) {
 			print set_bcolor(); # Reset
 			print "\n\n";
-			$section = 0;
-		} elsif ($section > 0 && ($section % 6 == 0)) {
+			$section  = 0;
+			$grouping = 6;
+		} elsif ($section > 0 && ($section % $grouping == 0)) {
 			print set_bcolor(); # Reset
 			print "\n";
 		}
@@ -123,6 +126,7 @@ sub term_ansicolor {
 
 	my $absolute = 0;
 	my $group    = 0;
+	my $grouping = 8;
 	foreach my $name (@colors) {
 		my $bg       = "on_$name";
 		my $map_num  = int($map->{$name});
@@ -143,8 +147,9 @@ sub term_ansicolor {
 
 		if ($absolute == 16 || $absolute == 232) {
 			print "\n\n";
-			$group = 0;
-		} elsif ($group % 6 == 0) {
+			$group    = 0;
+			$grouping = 6;
+		} elsif ($group % $grouping == 0) {
 			print "\n";
 		}
 	}
