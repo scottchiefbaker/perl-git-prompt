@@ -2,11 +2,11 @@
 
 use strict;
 
-my $args  = join(" ",@ARGV);
-my ($raw) = $args =~ /--raw/;
+my $args   = join(" ",@ARGV);
+my ($perl) = $args =~ /--perl/;
 
 # Term::ANSIColor didn't get 256 color constants until 4.0
-if (!$raw && has_term_ansicolor(4.0)) {
+if ($perl && has_term_ansicolor(4.0)) {
 	require Term::ANSIColor;
 	Term::ANSIColor->import(':constants','color','uncolor');
 
