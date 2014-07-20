@@ -4,6 +4,12 @@ use strict;
 
 my $args   = join(" ",@ARGV);
 my ($perl) = $args =~ /--perl/;
+my ($both) = $args =~ /--both/;
+
+# If we want both, we set perl also
+if ($both) {
+	$perl = 1;
+}
 
 # Term::ANSIColor didn't get 256 color constants until 4.0
 if ($perl && has_term_ansicolor(4.0)) {
@@ -127,20 +133,28 @@ sub term_ansicolor {
 	my $absolute = 0;
 	my $group    = 0;
 	my $grouping = 8;
-	foreach my $name (@colors) {
-		my $bg       = "on_$name";
-		my $map_num  = int($map->{$name});
-		my $raw_ansi = sprintf("#%03i",$map_num);
 
-		print color('bright_white');
-		printf("%7s ",$name);
+	print "Showing Term::ANSIColor constant names\n\n";
+
+	foreach my $name (@colors) {
+		my $bg          = "on_$name";
+		my $map_num     = int($map->{$name});
+		my $perl_name   = sprintf("%6s",$name);
+		my $ansi_number = sprintf("#%03i",$map_num);
+
+		my $name_string = "";
+		if ($both) {
+			$name_string = "$perl_name / $ansi_number";
+		} else {
+			$name_string = "$perl_name";
+		}
 
 		if (needs_white($map_num)) {
-			print color($bg) . "  " . color('bright_white') . $raw_ansi . "  ";
+			print color($bg) . "   " . color('bright_white') . $name_string . "   ";
 		} else {
-			print color($bg) . "  " . color("black") . $raw_ansi . "  ";
+			print color($bg) . "   " . color("black") . $name_string . "   ";
 		}
-		print color('reset');
+		print color('reset') . "  ";
 
 		$absolute++;
 		$group++;
