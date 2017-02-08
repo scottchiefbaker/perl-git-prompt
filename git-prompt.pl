@@ -27,7 +27,7 @@ my $DIRTY_COLOR   = color(203); # Color when the branch is dirty                
 my $CLEAN_COLOR   = color(83);  # Color when the branch is clean                 #3
 my $BRACE_COLOR   = color(15);  # Color of the file count braces                 #4
 my $AHEAD_COLOR   = color(117); # Color when the branch is ahead of the remote   #5
-my $BEHIND_COLOR  = color(196); # Color when the branch is behind of the remote  #5
+my $BEHIND_COLOR  = color(196); # Color when the branch is behind the remote     #5
 my $PENDING_COLOR = color(11);  # Color of the uncommitted file count            #6
 my $RESET_COLOR   = color();    # Reset the color
 
