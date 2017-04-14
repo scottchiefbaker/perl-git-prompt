@@ -5,6 +5,11 @@ use strict;
 my $args   = join(" ",@ARGV);
 my ($perl) = $args =~ /--perl/;
 my ($both) = $args =~ /--both/;
+my ($true) = $args =~ /--(true|24)/;
+
+if ($true) {
+	show_true_color_matrix();
+}
 
 # If we want both, we set perl also
 if ($both) {
@@ -208,4 +213,26 @@ sub needs_white {
 	} else {
 		return 0;
 	}
+}
+
+sub show_true_color_matrix {
+	my $step  = 32;
+	my $reset = set_bcolor();
+
+	for (my $r = 0; $r <= 255; $r += $step) {
+		for (my $g = 0; $g <= 255; $g += $step) {
+			for (my $b = 0; $b <= 255; $b += $step) {
+				#if (!defined($c)) { $ret = "\e[0m"; } # Reset the color
+				#else { $ret = "\e[38;5;${c}m"; }
+				my $color = "\e[48;2;$r;$g;${b}m";
+
+				print $color . "  ";
+			}
+
+		}
+
+		print "$reset\n";
+	}
+
+	exit;
 }
