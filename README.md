@@ -7,7 +7,7 @@ Perl script to show current Git branch and changeset status in the prompt.
 
 Put the following in your `~/.bashrc`
 
-~~~
+~~~bash
 # Add git status to the existing bash prompt
 GIT_PROMPT_PATH="$HOME/github/perl-git-prompt/git-prompt.pl"
 if [[ -f $GIT_PROMPT_PATH ]] && [[ -z $GIT_PROMPT ]]; then
