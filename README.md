@@ -1,7 +1,7 @@
 perl-git-prompt
 ===============
 
-Git extension to show current git branch and changeset status in the prompt.
+Perl script to show current Git branch and changeset status in the prompt.
 
 Put the following in your `~/.bashrc`
 
@@ -25,7 +25,7 @@ Examples:
 ![Example Prompt](http://www.perturb.org/images/git-prompt-2.png)
 
 * You are on the **vader** branch.
-* Your local repo is on the same commit at the remote
+* Your local repo is on the same commit as the remote
 * There are no files in the staging area
 
 Note:
