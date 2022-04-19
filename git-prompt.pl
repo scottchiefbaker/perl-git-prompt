@@ -96,7 +96,7 @@ if ($i && $i->{'branch'}) {
 		} elsif ($i->{dirty} && ($i->{dirty} == $i->{staged})) {
 			print $CLEAN_COLOR;
 		# If some of the files are staged (but not all)
-		} elsif (($i->{'dirty'} >= 0) && ($i->{'staged'} >= 0)) {
+		} elsif ($i->{dirty} && ($i->{dirty} != $i->{staged})) {
 			print $PENDING_COLOR;
 		}
 
