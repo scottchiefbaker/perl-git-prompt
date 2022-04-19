@@ -101,7 +101,9 @@ if ($i && $i->{'branch'}) {
 		}
 
 		# Print out the number of dirty files
-		print $i->{'dirty'};
+		if ($i->{dirty}) {
+			print $i->{'dirty'};
+		}
 
 		# Close paren
 		print $BRACE_COLOR . "]";
