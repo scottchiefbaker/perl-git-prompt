@@ -193,6 +193,7 @@ sub get_git_info {
 	# Init some variables
 	$ret->{'staged'}   = 0;
 	$ret->{'unstaged'} = 0;
+	$ret->{'dirty'}    = 0;
 
 	# Find the number of files in each given state
 	my $state;
