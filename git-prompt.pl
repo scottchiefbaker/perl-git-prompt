@@ -155,6 +155,10 @@ sub get_git_info {
 	}
 
 	my $ret = {};
+	# Init some variables
+	$ret->{staged}   = 0;
+	$ret->{unstaged} = 0;
+	$ret->{dirty}    = 0;
 
 	# Git status has all the data we'll need to get the parts
 	my $cmd = "2>/dev/null git status";
@@ -187,11 +191,6 @@ sub get_git_info {
 		$ret->{'clean'} = 1;
 		return $ret;
 	}
-
-	# Init some variables
-	$ret->{staged}   = 0;
-	$ret->{unstaged} = 0;
-	$ret->{dirty}    = 0;
 
 	# Find the number of files in each given state
 	my $state;
