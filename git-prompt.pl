@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
-use strict;
+use warnings;
+use v5.16;
 
 ################################################################
 # Git status in your bash prompt
@@ -113,8 +114,8 @@ if ($i && $i->{'branch'}) {
 
 # Set the foreground color
 sub color {
-	my $c    = shift();
-	my $bold = shift();
+	my $c    = shift() || "";
+	my $bold = shift() || "";
 
 	my $ret = '';
 
