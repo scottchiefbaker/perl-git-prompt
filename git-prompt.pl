@@ -42,9 +42,7 @@ my $args = argv();
 
 # If the user requests debug dump out the data structure
 if ($args->{debug}) {
-	require Data::Dump::Color;
-	Data::Dump::Color::dd($i);
-	exit;
+	kd($i);
 }
 
 # If they request JSON spit that out
@@ -191,9 +189,9 @@ sub get_git_info {
 	}
 
 	# Init some variables
-	$ret->{'staged'}   = 0;
-	$ret->{'unstaged'} = 0;
-	$ret->{'dirty'}    = 0;
+	$ret->{staged}   = 0;
+	$ret->{unstaged} = 0;
+	$ret->{dirty}    = 0;
 
 	# Find the number of files in each given state
 	my $state;
@@ -237,4 +235,28 @@ sub argv {
 	}
 
 	return $ret;
+}
+
+# Add debug print krumo style
+# Borrowed from: https://www.perturb.org/display/1097_Perl_detect_if_a_module_is_installed_before_using_it.html
+sub AUTOLOAD {
+	our $AUTOLOAD; # keep 'use strict' happy
+
+	if ($AUTOLOAD eq 'main::k' || $AUTOLOAD eq 'main::kd') {
+		if (eval { require Data::Dump::Color }) {
+			*k = sub { Data::Dump::Color::dd(@_) };
+		} else {
+			require Data::Dumper;
+			*k = sub { print Data::Dumper::Dumper(@_) };
+		}
+
+		sub kd {
+			k(@_);
+
+			printf("Died at %2\$s line #%3\$s\n",caller());
+			exit(15);
+		}
+
+		eval($AUTOLOAD . '(@_)');
+	}
 }
