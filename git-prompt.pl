@@ -189,6 +189,10 @@ sub get_git_info {
 		return $ret;
 	}
 
+	# Init some variables
+	$ret->{'staged'}   = 0;
+	$ret->{'unstaged'} = 0;
+
 	# Find the number of files in each given state
 	my $state;
 	foreach my $line (split(/\n/,$out)) {
