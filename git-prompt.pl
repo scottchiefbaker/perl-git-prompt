@@ -1,7 +1,10 @@
 #!/usr/bin/perl
 
+use strict;
 use warnings;
 use v5.16;
+
+binmode(STDOUT, ":utf8");
 
 ################################################################
 # Git status in your bash prompt
@@ -26,10 +29,11 @@ my $PROMPT_COLOR  = color(45);  # Color of the header prompt                    
 my $PAREN_COLOR   = color(15);  # Color of the parenthesis                       #2
 my $DIRTY_COLOR   = color(203); # Color when the branch is dirty                 #3
 my $CLEAN_COLOR   = color(83);  # Color when the branch is clean                 #3
+my $MERGE_COLOR   = color(214); # Color when the branch has merge conflict       #3
 my $BRACE_COLOR   = color(15);  # Color of the file count braces                 #4
 my $AHEAD_COLOR   = color(117); # Color when the branch is ahead of the remote   #5
 my $BEHIND_COLOR  = color(196); # Color when the branch is behind the remote     #5
-my $PENDING_COLOR = color(11);  # Color of the uncommitted file count            #6
+my $PENDING_COLOR = color(228); # Color of the uncommitted file count            #6
 my $RESET_COLOR   = color();    # Reset the color
 
 ###################################################################
@@ -57,7 +61,9 @@ if ($i && $i->{'branch'}) {
 	print $PROMPT_COLOR . "Git Branch: ";
 
 	my $branch_color = '';
-	if ($i->{'dirty'}) {
+	if ($i->{'merge_conflict'}) {
+		$branch_color = $MERGE_COLOR;
+	} elsif ($i->{'dirty'}) {
 		$branch_color = $DIRTY_COLOR;
 	} else {
 		$branch_color = $CLEAN_COLOR;
@@ -103,6 +109,15 @@ if ($i && $i->{'branch'}) {
 		# Print out the number of dirty files
 		if ($i->{dirty}) {
 			print $i->{'dirty'};
+		}
+
+		if ($i->{merge_conflict}) {
+			my $count = $i->{merge_conflict};
+
+			#my $merge_symbol = "\N{ALMOST EQUAL TO}";
+			my $merge_symbol = "\x{21C4}";
+
+			print $MERGE_COLOR . " " . $merge_symbol . $count;
 		}
 
 		# Close paren
@@ -169,6 +184,9 @@ sub get_git_info {
 	# Find the branch we're on
 	if ($out =~ /On branch (.+?)\n/) {
 		$ret->{'branch'} = $1;
+	} elsif ($out =~ /rebasing branch '(.+?)'/) {
+		$ret->{'branch'}   = $1;
+		$ret->{'rebasing'} = 1;
 	} elsif ($out =~ /Not currently on any branch|HEAD detached (at|from)/) {
 		$ret->{'branch'} = "DETACHED_HEAD";
 	}
