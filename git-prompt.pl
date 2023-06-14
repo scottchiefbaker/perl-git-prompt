@@ -61,7 +61,7 @@ if ($i && $i->{'branch'}) {
 	print $PROMPT_COLOR . "Git Branch: ";
 
 	my $branch_color = '';
-	if ($i->{'merge_conflict'}) {
+	if ($i->{'merge_conflict'} || $i->{rebasing}) {
 		$branch_color = $MERGE_COLOR;
 	} elsif ($i->{'dirty'}) {
 		$branch_color = $DIRTY_COLOR;
