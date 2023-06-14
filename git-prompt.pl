@@ -173,6 +173,11 @@ sub get_git_info {
 		$ret->{'branch'} = "DETACHED_HEAD";
 	}
 
+	if (my @m = $out =~ /both modified:/g) {
+		my $count = scalar(@m);
+		$ret->{merge_conflict} = $count;
+	}
+
 	#Your branch is behind 'origin/vader' by 2 commits
 	if ($out =~ /Your branch is (ahead|behind).*'(.+?)' by (\d+) commit/) {
 		my $sigil = "?";
