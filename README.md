@@ -10,7 +10,7 @@ Put the following in your `~/.bashrc`
 ~~~bash
 # Add git status to the existing bash prompt
 GIT_PROMPT_PATH="$HOME/github/perl-git-prompt/git-prompt.pl"
-if [[ $GIT_PROMPT_PATH != *$PS1* ]]; then
+if [[ ! "$PS1" =~ "$GIT_PROMPT_PATH" ]]; then
     export PS1="\$($GIT_PROMPT_PATH)"$PS1
 fi
 ~~~
