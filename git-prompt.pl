@@ -216,6 +216,11 @@ sub get_git_info {
 		# Unmerged entries
 		} elsif ($line =~ /^u /) {
 			$ret->{'merge_conflict'}++;
+		# Untracked entries count toward dirty: a branch with new files is not
+		# clean. They do not touch staged/unstaged, so the "all staged" color
+		# still requires every dirty file to be staged.
+		} elsif ($line =~ /^\? /) {
+			$ret->{'dirty'}++;
 		}
 	}
 
