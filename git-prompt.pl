@@ -12,7 +12,7 @@ binmode(STDOUT, ":utf8");
 # Git status in your bash prompt
 # https://github.com/scottchiefbaker/perl-git-prompt.git
 #
-# Version 0.2
+# Version 0.3.2
 #
 # Put this in your ~/.bashrc to show git status in your prompt:
 #
