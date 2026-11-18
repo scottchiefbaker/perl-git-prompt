@@ -3,6 +3,7 @@
 use strict;
 use warnings;
 use v5.16;
+use Encode qw(decode);
 
 binmode(STDOUT, ":utf8");
 
@@ -52,7 +53,10 @@ if ($args->{debug}) {
 # If they request JSON spit that out
 if ($args->{json}) {
 	require JSON;
-	print JSON::encode_json($i) . "\n";
+	# Character-mode encode: encode_json() returns UTF-8 *bytes*, which the
+	# :utf8 layer on STDOUT would encode a second time. This returns characters
+	# and the layer encodes them exactly once.
+	print JSON->new->encode($i) . "\n";
 	exit;
 }
 
@@ -167,6 +171,12 @@ sub get_git_info {
 	# Porcelain v2 is stable and locale independent, unlike human readable status
 	my $out = `LC_ALL=C git --no-optional-locks status --porcelain=v2 --branch 2>/dev/null`;
 
+	# Git hands us raw bytes (branch names are stored as bytes in the ref, usually
+	# UTF-8). Decode once so the :utf8 layer on STDOUT encodes them exactly once;
+	# without this every high byte gets double-encoded. Malformed bytes become
+	# U+FFFD instead of dying, so a weird ref name can't break the prompt.
+	$out = decode('UTF-8', $out);
+
 	foreach my $line (split(/\n/, $out)) {
 		# Branch header lines
 		if ($line =~ /^# branch\.head (.+)$/) {
@@ -226,6 +236,8 @@ sub get_git_info {
 
 			chomp($head_name);
 			$head_name =~ s{^refs/heads/}{};
+			# Same raw-byte situation as the status output above
+			$head_name = decode('UTF-8', $head_name);
 			$ret->{'branch'} = $head_name;
 		}
 	}
