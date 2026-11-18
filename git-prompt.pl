@@ -98,11 +98,11 @@ if ($i && $i->{'branch'}) {
 		# If none of the files are staged
 		if (($i->{'dirty'} >= 1) && ($i->{'staged'} == 0)) {
 			print $DIRTY_COLOR;
-		# If all the files are staged
-		} elsif ($i->{dirty} && ($i->{dirty} == $i->{staged})) {
+		# If all the files are staged (and none have further unstaged edits)
+		} elsif ($i->{dirty} && ($i->{dirty} == $i->{staged}) && !$i->{unstaged}) {
 			print $CLEAN_COLOR;
 		# If some of the files are staged (but not all)
-		} elsif ($i->{dirty} && ($i->{dirty} != $i->{staged})) {
+		} elsif ($i->{dirty}) {
 			print $PENDING_COLOR;
 		}
 
