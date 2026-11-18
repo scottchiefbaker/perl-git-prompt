@@ -77,8 +77,10 @@ if ($i && $i->{'branch'}) {
 	my $branch_name = $i->{'branch'};
 	print $PAREN_COLOR . "(" . $branch_color . $branch_name . $PAREN_COLOR . ") ";
 
-	# If we're ahead/behind of the remote OR there are pending files
-	if ($i->{'position'} || $i->{'dirty'}) {
+	# If we're ahead/behind of the remote OR there are pending files or conflicts.
+	# Conflicts have to be listed here too: unmerged entries do not count toward
+	# dirty, and without an upstream there is no position either.
+	if ($i->{'position'} || $i->{'dirty'} || $i->{'merge_conflict'}) {
 		# Open paren
 		print $BRACE_COLOR . "[";
 
@@ -121,7 +123,10 @@ if ($i && $i->{'branch'}) {
 			#my $merge_symbol = "\N{ALMOST EQUAL TO}";
 			my $merge_symbol = "\x{21C4}";
 
-			print $MERGE_COLOR . " " . $merge_symbol . $count;
+			# Space it away from any numbers, unless it's alone in the bracket
+			my $sep = ($i->{'dirty'} || $i->{'position'}) ? " " : "";
+
+			print $MERGE_COLOR . $sep . $merge_symbol . $count;
 		}
 
 		# Close paren
