@@ -51,9 +51,8 @@ Options:
 * `NO_COLOR` (set to any non-empty value) also disables color, following
   [no-color.org](https://no-color.org).
 
-Color is on by default, including when the output is captured by `$()` in
-`PS1`. Use `--no-color` when piping the output somewhere that should not
-receive escape codes.
+Color is on by default. Use `--no-color` when piping the output somewhere
+that should not receive escape codes.
 
 Note:
 -----
