@@ -145,31 +145,23 @@ sub color {
 
 ###################################################
 
-sub is_git_dir {
-	# If the exit code is 0 we're in a git enabled dir
-	my $ok = system("git rev-parse --is-inside-work-tree >/dev/null 2>&1");
-
-	if ($ok == 0) {
-		return 1;
-	} else {
-		return 0;
-	}
-}
-
 sub get_git_info {
-	# See if we're in a git enabled dir
-	if (!is_git_dir()) {
-		return 0;
-	}
-
 	my $ret = {};
 	# Init some variables
 	$ret->{staged}   = 0;
 	$ret->{unstaged} = 0;
 	$ret->{dirty}    = 0;
 
-	# Porcelain v2 is stable and locale independent, unlike human readable status
+	# Porcelain v2 is stable and locale independent, unlike human readable status.
+	# This single call doubles as the repo check: git status exits nonzero when
+	# we're outside a work tree (no repo, or inside .git itself), so we fork git
+	# once per prompt instead of separately probing with rev-parse.
 	my $out = `LC_ALL=C git --no-optional-locks status --porcelain=v2 --branch 2>/dev/null`;
+
+	# Not in a git enabled dir
+	if ($? != 0) {
+		return 0;
+	}
 
 	# Git hands us raw bytes (branch names are stored as bytes in the ref, usually
 	# UTF-8). Decode once so the :utf8 layer on STDOUT encodes them exactly once;
