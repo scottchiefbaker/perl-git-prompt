@@ -53,11 +53,11 @@ if ($args->{debug}) {
 
 # If they request JSON spit that out
 if ($args->{json}) {
-	require JSON;
+	require JSON::PP;
 	# Character-mode encode: encode_json() returns UTF-8 *bytes*, which the
 	# :utf8 layer on STDOUT would encode a second time. This returns characters
 	# and the layer encodes them exactly once.
-	print JSON->new->encode($i) . "\n";
+	print JSON::PP->new->encode($i) . "\n";
 	exit;
 }
 
