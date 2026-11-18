@@ -187,7 +187,8 @@ can make the prompt lag. No timeout guard exists.
 
 - The header snippet's guard (`[[ -z $GIT_PROMPT ]]`, line 19) differs from
   the README's (`[[ ! "$PS1" =~ "$GIT_PROMPT_PATH" ]]`). Both work; keep them
-  in sync so users don't mix the two.
+  in sync so users don't mix the two. **(Fixed: the script header now uses
+  the README's guard.)**
 - README text says "It's 2013" — stale. **(Fixed 2026-11-18, together with a
   new git 2.15+ requirement note.)**
 
