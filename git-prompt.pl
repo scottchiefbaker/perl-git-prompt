@@ -84,14 +84,17 @@ if ($i && $i->{'branch'}) {
 		# Open paren
 		print $BRACE_COLOR . "[";
 
-		# Ahead/Behind of the remote server
+		# Ahead/Behind of the remote server. A diverged branch shows both
+		# counts, each in its own color: +2 in the ahead color, -3 in the
+		# behind color.
 		if ($i->{'position'}) {
 			if ($i->{'ahead'}) {
-				print $AHEAD_COLOR;
-			} elsif ($i->{'behind'}) {
-				print $BEHIND_COLOR;
+				print $AHEAD_COLOR . "+" . $i->{'ahead'};
 			}
-			print $i->{'position'};
+
+			if ($i->{'behind'}) {
+				print $BEHIND_COLOR . ($i->{'ahead'} ? " " : "") . "-" . $i->{'behind'};
+			}
 		}
 
 		# If the repo is dirty AND we're ahead/behind put a space between the numbers
@@ -193,12 +196,26 @@ sub get_git_info {
 		} elsif ($line =~ /^# branch\.ab \+(\d+) -(\d+)$/) {
 			my ($ahead, $behind) = ($1, $2);
 
+			# Record both counts independently. Nonzero ahead AND behind
+			# means the branch is diverged from the upstream, and the user
+			# needs to see BOTH numbers: the old if/elsif showed only the
+			# ahead count, so a diverged branch looked pushable when a
+			# push would actually be rejected. The + 0 forces a numeric
+			# value so JSON encodes a number, not a string.
 			if ($ahead) {
-				$ret->{'ahead'}    = 1;
-				$ret->{'position'} = "+$ahead";
-			} elsif ($behind) {
-				$ret->{'behind'}   = 1;
-				$ret->{'position'} = "-$behind";
+				$ret->{'ahead'} = $ahead + 0;
+			}
+
+			if ($behind) {
+				$ret->{'behind'} = $behind + 0;
+			}
+
+			# Build the position string from the nonzero parts
+			if ($ahead || $behind) {
+				my @pos;
+				push @pos, "+$ahead"  if $ahead;
+				push @pos, "-$behind" if $behind;
+				$ret->{'position'} = join(" ", @pos);
 			}
 		# Ordinary changed (1) and rename/copy (2) entries: "XY" is index + worktree status
 		} elsif ($line =~ /^[12] (.)(.) /) {
