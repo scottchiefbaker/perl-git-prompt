@@ -131,16 +131,22 @@ if ($i && $i->{'branch'}) {
 	print "\n" . $RESET_COLOR;
 }
 
-# Set the foreground color
+# Set the foreground color. Each escape is wrapped in \x01/\x02 (readline's
+# start/end-of-ignore markers, what bash itself turns \[ and \] into). Our
+# output reaches the prompt through $() command substitution in PS1, and bash
+# does not re-scan substitution output for prompt escapes, so literal \[ \]
+# would print as garbage and STILL miscount the line length. Raw control
+# bytes pass through untouched; readline drops them and excludes the escapes
+# from its width math, so wrapping and history/backspace stay correct.
 sub color {
 	my $c = shift;
 
 	# No color given: reset
 	if (!defined($c)) {
-		return "\e[0m";
+		return "\x01\e[0m\x02";
 	}
 
-	return "\e[0m\e[38;5;${c}m";
+	return "\x01\e[0m\x02\x01\e[38;5;${c}m\x02";
 }
 
 ###################################################
