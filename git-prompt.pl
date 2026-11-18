@@ -26,6 +26,14 @@ binmode(STDOUT, ":utf8");
 #      1      2  3   2 4 5 6 4
 # Git Branch: (master) [+2 14]
 
+# A string of all the args passed in
+my $args = argv(@ARGV);
+
+# Color only when we're talking to a terminal and the user hasn't opted out.
+# Piped output (or a shell capturing it) would otherwise get raw escapes.
+# NO_COLOR (https://no-color.org) disables color when set to any non-empty value.
+my $use_color = (-t STDOUT) && !$args->{'no-color'} && !(defined($ENV{NO_COLOR}) && length($ENV{NO_COLOR}));
+
 # Color codes found in utils/term-colors.pl
 my $PROMPT_COLOR  = color(45);  # Color of the header prompt                     #1
 my $PAREN_COLOR   = color(15);  # Color of the parenthesis                       #2
@@ -42,9 +50,6 @@ my $RESET_COLOR   = color();    # Reset the color
 
 # Get the state of git in the current dir
 my $i = get_git_info();
-
-# A string of all the args passed in
-my $args = argv(@ARGV);
 
 # If the user requests debug dump out the data structure
 if ($args->{debug}) {
@@ -149,6 +154,10 @@ if ($i && $i->{'branch'}) {
 # from its width math, so wrapping and history/backspace stay correct.
 sub color {
 	my $c = shift;
+
+	if (!$use_color) {
+		return '';
+	}
 
 	# No color given: reset
 	if (!defined($c)) {
