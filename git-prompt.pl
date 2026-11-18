@@ -170,11 +170,30 @@ sub get_git_info {
 	# Porcelain v2 is stable and locale independent, unlike human readable status.
 	# This single call doubles as the repo check: git status exits nonzero when
 	# we're outside a work tree (no repo, or inside .git itself), so we fork git
-	# once per prompt instead of separately probing with rev-parse.
-	my $out = `LC_ALL=C git --no-optional-locks status --porcelain=v2 --branch 2>/dev/null`;
+	# once per prompt instead of separately probing with rev-parse. Stderr is
+	# merged into the capture instead of discarded so a REAL failure (git too
+	# old, dubious ownership, corrupt index) can be told apart from the ordinary
+	# no-repo cases below; on success stderr is empty, so the parse is unaffected.
+	my $out = `LC_ALL=C git --no-optional-locks status --porcelain=v2 --branch 2>&1`;
 
 	# Not in a git enabled dir
 	if ($? != 0) {
+		# Expected "no repo" cases, silent exactly like the old 2>/dev/null
+		# check: git couldn't be executed at all (missing binary: $? == -1,
+		# or the shell's command-not-found 127), or git's own no-repo /
+		# no-work-tree fatal (exit 128).
+		return 0 if $? == -1;
+		return 0 if ($? >> 8) == 127;
+		return 0 if $out =~ /not a git repository|must be run in a work tree/i;
+
+		# Anything else (git too old for --porcelain=v2 / --no-optional-locks,
+		# dubious ownership, corrupt index) used to look identical to "no
+		# repo" and the prompt silently vanished. Surface git's first error
+		# line so the user knows why (first line only: an unknown option
+		# dumps a usage screenful).
+		my ($err) = split(/\n/, $out);
+		$err = "git status failed (exit " . ($? >> 8) . ")" unless defined($err) && length($err);
+		warn "git-prompt: $err\n";
 		return 0;
 	}
 

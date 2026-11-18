@@ -105,7 +105,7 @@ Location: line 64.
 **Fix:** use `defined && length` instead of truthiness for the branch check;
 `exists`-based flag checks in `argv()`.
 
-### 5. Any git failure == silent vanishing — MEDIUM
+### 5. Any git failure == silent vanishing — MEDIUM ✅ FIXED
 
 Location: lines 170–175.
 
@@ -115,6 +115,25 @@ errors, or a corrupt index all exit nonzero — indistinguishable from "not a
 repo," so the user just loses the prompt with zero hint.
 
 **Fix:** document a git version floor, or emit a one-time stderr note.
+
+**Status (2026-11-18):** fixed, both halves. The single git call now captures
+stderr (`2>&1` instead of `2>/dev/null` — still exactly one fork on every
+path) so a real failure can be told apart from the ordinary no-repo case. The
+expected "no repo" situations stay silent exactly like before: git not
+executable at all (`$? == -1`), the shell's command-not-found 127, and git's
+own "not a git repository" / "must be run in a work tree" fatals (both
+messages verified against real git). Anything else — old git without our
+flags, dubious ownership, corrupt index — prints one line to STDERR: git's
+own first error line, prefixed `git-prompt:` (first line only, because an
+unknown option dumps a usage screenful). Deliberately not one-time: a
+once-only latch would need a state file, and the warn only fires when the
+prompt is already gone, so it stops the moment the root cause is fixed. The
+git 2.15+ floor is now documented in the README. Verified: repo root, repo
+subdir, non-repo, inside `.git`, missing git (both `$? == -1` and the
+shell's 127), and `--json` are byte-identical to the old script with no new
+STDERR (`--json` key order is per-process random in both scripts); simulated
+failures (fake old git exiting 129 with a usage dump, fake dubious ownership
+exiting 128) each print exactly the one-line warn with empty STDOUT.
 
 ### 6. Warnings leak onto the terminal — LOW
 
@@ -169,7 +188,8 @@ can make the prompt lag. No timeout guard exists.
 - The header snippet's guard (`[[ -z $GIT_PROMPT ]]`, line 19) differs from
   the README's (`[[ ! "$PS1" =~ "$GIT_PROMPT_PATH" ]]`). Both work; keep them
   in sync so users don't mix the two.
-- README text says "It's 2013" — stale.
+- README text says "It's 2013" — stale. **(Fixed 2026-11-18, together with a
+  new git 2.15+ requirement note.)**
 
 ## Suggested fix order
 

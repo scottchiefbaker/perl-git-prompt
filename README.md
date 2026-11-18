@@ -15,6 +15,9 @@ if [[ ! "$PS1" =~ "$GIT_PROMPT_PATH" ]]; then
 fi
 ~~~
 
+Requires git 2.15 or newer (the script uses `status --porcelain=v2` and
+`--no-optional-locks`).
+
 Examples:
 ---------
 ![Example Prompt](http://www.perturb.org/images/git-prompt-1.png)
@@ -31,6 +34,5 @@ Examples:
 
 Note:
 -----
-This script assumes you have 256 color terminal support. It's 2013, you
-should have a 256 color terminal. If you still have a 16 color terminal
-no guarantees how this will look.
+This script assumes you have 256 color terminal support. If you still have
+a 16 color terminal no guarantees how this will look.
