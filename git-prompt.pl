@@ -175,63 +175,69 @@ sub get_git_info {
 	$ret->{unstaged} = 0;
 	$ret->{dirty}    = 0;
 
-	# Git status has all the data we'll need to get the parts
-	my $out = `git --no-optional-locks status 2>/dev/null`;
+	# Porcelain v2 is stable and locale independent, unlike human readable status
+	my $out = `LC_ALL=C git --no-optional-locks status --porcelain=v2 --branch 2>/dev/null`;
 
-	# Find the branch we're on
-	if ($out =~ /On branch (.+?)\n/) {
-		$ret->{'branch'} = $1;
-	} elsif ($out =~ /rebasing branch '(.+?)'/) {
-		$ret->{'branch'}   = $1;
-		$ret->{'rebasing'} = 1;
-	} elsif ($out =~ /Not currently on any branch|HEAD detached (at|from)/) {
-		$ret->{'branch'} = "DETACHED_HEAD";
-	}
+	foreach my $line (split(/\n/, $out)) {
+		# Branch header lines
+		if ($line =~ /^# branch\.head (.+)$/) {
+			my $head = $1;
 
-	if (my @m = $out =~ /both modified:/g) {
-		my $count = scalar(@m);
-		$ret->{merge_conflict} = $count;
-	}
+			if ($head eq '(detached)') {
+				$ret->{'branch'} = "DETACHED_HEAD";
+			} else {
+				$ret->{'branch'} = $head;
+			}
+		} elsif ($line =~ /^# branch\.ab \+(\d+) -(\d+)$/) {
+			my ($ahead, $behind) = ($1, $2);
 
-	#Your branch is behind 'origin/vader' by 2 commits
-	if ($out =~ /Your branch is (ahead|behind).*'(.+?)' by (\d+) commit/) {
-		my $sigil = "?";
-		if ($1 eq 'ahead') {
-			$sigil = "+";
-			$ret->{'ahead'} = 1;
-		} elsif ($1 eq 'behind') {
-			$sigil = "-";
-			$ret->{'behind'} = 1;
+			if ($ahead) {
+				$ret->{'ahead'}    = 1;
+				$ret->{'position'} = "+$ahead";
+			} elsif ($behind) {
+				$ret->{'behind'}   = 1;
+				$ret->{'position'} = "-$behind";
+			}
+		# Ordinary changed (1) and rename/copy (2) entries: "XY" is index + worktree status
+		} elsif ($line =~ /^[12] (.)(.) /) {
+			my ($x, $y) = ($1, $2);
+
+			if ($x ne '.') {
+				$ret->{'staged'}++;
+			}
+
+			if ($y ne '.') {
+				$ret->{'unstaged'}++;
+			}
+
+			$ret->{'dirty'}++;
+		# Unmerged entries
+		} elsif ($line =~ /^u /) {
+			$ret->{'merge_conflict'}++;
 		}
-
-		my $str = "${sigil}$3";
-		$ret->{'position'} = $str;
 	}
 
 	# If there is nothing to commit don't keep looking there is nothing there
-	if ($out =~ /^nothing to commit/m) {
+	if ($ret->{'dirty'} == 0 && !$ret->{'merge_conflict'}) {
 		$ret->{'clean'} = 1;
-		return $ret;
 	}
 
-	# Find the number of files in each given state
-	my $state;
-	foreach my $line (split(/\n/,$out)) {
-		# Files staged to be committed
-		if ($line =~ /Changes to be committed:/) {
-			$state = "staged";
-		# Files git is aware of but aren't going to be committed
-		} elsif ($line =~ /Changes not staged for commit:/) {
-			$state = "unstaged";
-		# Files gits sees but isn't tracking
-		} elsif ($line =~ /Untracked files:/) {
-			$state = "untracked";
-		} elsif ($line =~ /Unmerged paths:/) {
-			$state = "unmerged";
-		# If the line has a \t in it, it's a file name
-		} elsif ($line =~ /\t/) {
-			$ret->{$state}++;
-			$ret->{'dirty'}++;
+	# Porcelain v2 does not report rebases, so check the rebase state dirs directly
+	# (no extra git call). Only works when .git is a directory, not a worktree file.
+	if (-d ".git/rebase-merge" || -d ".git/rebase-apply") {
+		$ret->{'rebasing'} = 1;
+	}
+
+	# During a rebase porcelain v2 reports a detached HEAD. The rebase-merge
+	# backend records the branch being rebased in head-name, so use that instead.
+	if ($ret->{'rebasing'} && $ret->{'branch'} eq 'DETACHED_HEAD' && -f ".git/rebase-merge/head-name") {
+		if (open(my $fh, '<', ".git/rebase-merge/head-name")) {
+			my $head_name = <$fh>;
+			close($fh);
+
+			chomp($head_name);
+			$head_name =~ s{^refs/heads/}{};
+			$ret->{'branch'} = $head_name;
 		}
 	}
 
