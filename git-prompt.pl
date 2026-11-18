@@ -42,7 +42,7 @@ my $RESET_COLOR   = color();    # Reset the color
 my $i = get_git_info();
 
 # A string of all the args passed in
-my $args = argv();
+my $args = argv(@ARGV);
 
 # If the user requests debug dump out the data structure
 if ($args->{debug}) {
@@ -234,8 +234,8 @@ sub get_git_info {
 }
 
 sub argv {
-	my @args = @_ || @ARGV;
-	my $ret = {};
+	my @args = @_;
+	my $ret  = {};
 
 	for (my $i = 0; $i < scalar(@args); $i++) {
 		# If the item starts with "-" it's a key
