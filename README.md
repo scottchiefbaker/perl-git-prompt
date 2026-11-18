@@ -15,9 +15,6 @@ if [[ ! "$PS1" =~ "$GIT_PROMPT_PATH" ]]; then
 fi
 ~~~
 
-Requires git 2.15 or newer (the script uses `status --porcelain=v2` and
-`--no-optional-locks`).
-
 Output:
 -------
 The prompt looks like `Git Branch: (branch) [position dirty ⇄conflicts]`:
@@ -54,14 +51,11 @@ Options:
 * `NO_COLOR` (set to any non-empty value) also disables color, following
   [no-color.org](https://no-color.org).
 
-Color is turned off automatically when the output is not a terminal, such
-as when it is piped or captured.
+Color is on by default, including when the output is captured by `$()` in
+`PS1`. Use `--no-color` when piping the output somewhere that should not
+receive escape codes.
 
 Note:
 -----
 This script assumes you have 256 color terminal support. If you still have
 a 16 color terminal no guarantees how this will look.
-
-The prompt is printed on two lines: the branch line, then a line break
-before the color reset. This keeps the prompt intact when `$()` strips
-trailing newlines.

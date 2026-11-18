@@ -28,10 +28,10 @@ binmode(STDOUT, ":utf8");
 # A string of all the args passed in
 my $args = argv(@ARGV);
 
-# Color only when we're talking to a terminal and the user hasn't opted out.
-# Piped output (or a shell capturing it) would otherwise get raw escapes.
-# NO_COLOR (https://no-color.org) disables color when set to any non-empty value.
-my $use_color = (-t STDOUT) && !$args->{'no-color'} && !(defined($ENV{NO_COLOR}) && length($ENV{NO_COLOR}));
+# Color is on by default. --no-color and NO_COLOR (https://no-color.org)
+# turn it off. Note that $() in PS1 captures STDOUT, so this cannot be
+# gated on -t STDOUT: that would strip color from the prompt itself.
+my $use_color = !$args->{'no-color'} && !(defined($ENV{NO_COLOR}) && length($ENV{NO_COLOR}));
 
 # Color codes found in utils/term-colors.pl
 my $PROMPT_COLOR  = color(45);  # Color of the header prompt                     #1
