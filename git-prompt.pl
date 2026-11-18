@@ -255,24 +255,12 @@ sub argv {
 
 # Add debug print krumo style
 # Borrowed from: https://www.perturb.org/display/1097_Perl_detect_if_a_module_is_installed_before_using_it.html
-sub AUTOLOAD {
-	our $AUTOLOAD; # keep 'use strict' happy
-
-	if ($AUTOLOAD eq 'main::k' || $AUTOLOAD eq 'main::kd') {
-		if (eval { require Data::Dump::Color }) {
-			*k = sub { Data::Dump::Color::dd(@_) };
-		} else {
-			require Data::Dumper;
-			*k = sub { print Data::Dumper::Dumper(@_) };
-		}
-
-		sub kd {
-			k(@_);
-
-			printf("Died at %2\$s line #%3\$s\n",caller());
-			exit(15);
-		}
-
-		eval($AUTOLOAD . '(@_)');
+BEGIN {
+	if (eval { require Dump::Krumo }) {
+		Dump::Krumo->import(qw/k kd/);
+	} else {
+		require Data::Dumper;
+		*k  = sub { print Data::Dumper::Dumper(\@_) };
+		*kd = sub { print Data::Dumper::Dumper(\@_); die; };
 	}
 }
