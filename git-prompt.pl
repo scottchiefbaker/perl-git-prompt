@@ -3,6 +3,7 @@
 use strict;
 use warnings;
 use v5.16;
+use Cwd qw(getcwd);
 use Encode qw(decode);
 
 binmode(STDOUT, ":utf8");
@@ -247,15 +248,20 @@ sub get_git_info {
 	}
 
 	# Porcelain v2 does not report rebases, so check the rebase state dirs directly
-	# (no extra git call). Only works when .git is a directory, not a worktree file.
-	if (-d ".git/rebase-merge" || -d ".git/rebase-apply") {
+	# (no extra git call). Those dirs live in the repo's git dir, which is only
+	# "./.git" at the top of a plain repo: from a subdirectory there is no .git in
+	# the CWD at all, and in linked worktrees/submodules .git is a *file* naming
+	# the real git dir. find_gitdir() resolves it in every one of those cases.
+	my $gitdir = find_gitdir();
+
+	if ($gitdir && (-d "$gitdir/rebase-merge" || -d "$gitdir/rebase-apply")) {
 		$ret->{'rebasing'} = 1;
 	}
 
 	# During a rebase porcelain v2 reports a detached HEAD. The rebase-merge
 	# backend records the branch being rebased in head-name, so use that instead.
-	if ($ret->{'rebasing'} && $ret->{'branch'} eq 'DETACHED_HEAD' && -f ".git/rebase-merge/head-name") {
-		if (open(my $fh, '<', ".git/rebase-merge/head-name")) {
+	if ($gitdir && $ret->{'rebasing'} && $ret->{'branch'} eq 'DETACHED_HEAD' && -f "$gitdir/rebase-merge/head-name") {
+		if (open(my $fh, '<', "$gitdir/rebase-merge/head-name")) {
 			my $head_name = <$fh>;
 			close($fh);
 
@@ -268,6 +274,57 @@ sub get_git_info {
 	}
 
 	return $ret;
+}
+
+# Locate the git dir for the repo we're standing in, without forking git: the
+# rebase state dirs live there, and they are not always at "./.git". From a
+# subdirectory there is no .git in the CWD at all, and in linked worktrees and
+# submodules .git is a *file* containing "gitdir: <path>". If GIT_DIR is set in
+# the environment we honor it (git itself does); otherwise walk up from the
+# CWD until we find a .git, following the file indirection if it is one.
+sub find_gitdir {
+	my $dir = getcwd();
+
+	return undef unless defined($dir);
+
+	# If GIT_DIR is set, git itself is using it, so it is the real git dir
+	if (defined($ENV{GIT_DIR}) && length($ENV{GIT_DIR})) {
+		my $gitdir = $ENV{GIT_DIR};
+		return ($gitdir =~ m{^/}) ? $gitdir : "$dir/$gitdir";
+	}
+
+	while (1) {
+		my $dot_git = "$dir/.git";
+
+		# Plain repo: .git is a directory right here
+		if (-d $dot_git) {
+			return $dot_git;
+		}
+
+		# Linked worktree or submodule: .git is a file with "gitdir: <path>"
+		if (-f $dot_git) {
+			open(my $fh, '<', $dot_git) or return undef;
+			my $line = <$fh>;
+			close($fh);
+
+			return undef unless defined($line);
+			chomp($line);
+
+			if ($line =~ /^gitdir:\s*(.+)$/) {
+				my $gitdir = $1;
+				# Absolute in linked worktrees, relative in submodules
+				return ($gitdir =~ m{^/}) ? $gitdir : "$dir/$gitdir";
+			}
+			return undef;
+		}
+
+		# No .git here: walk up one level
+		last if $dir eq '/';
+		$dir =~ s{/[^/]+$}{} or last;
+		$dir = '/' if $dir eq '';
+	}
+
+	return undef;
 }
 
 sub argv {

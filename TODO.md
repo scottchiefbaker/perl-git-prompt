@@ -27,7 +27,7 @@ guard — all small, local changes.
 
 ## Real footguns
 
-### 1. Rebase detection breaks in subdirectories — HIGH
+### 1. Rebase detection breaks in subdirectories — HIGH ✅ FIXED
 
 Location: lines 234, 240.
 
@@ -45,6 +45,19 @@ in linked worktrees and submodules (`.git` is a file there).
 
 **Fix:** without extra forks — walk up parent dirs until `-d "$found/.git"`,
 and if `.git` is a *file* read `gitdir: <path>` from it.
+
+**Status (2026-11-18):** fixed. A new `find_gitdir()` resolves the git dir with
+no extra forks: GIT_DIR from the environment if set (git itself honors it),
+otherwise a walk up from the CWD to the nearest `.git`, following the
+`gitdir: <path>` indirection when `.git` is a *file* (absolute paths in
+linked worktrees, relative ones resolved against the dir containing the
+`.git` file, as in submodules). Verified mid-rebase with a conflict from:
+repo root, nested subdirs (several levels), a linked worktree (root and
+subdir), a submodule (root and subdir), and with GIT_DIR exported — all now
+recover the branch from head-name, including `--json`. Clean, dirty,
+detached-HEAD, empty-repo, non-repo, root-mid-rebase, and conflicted-`git am`
+outputs are byte-identical to the old script, with no new warnings on STDERR.
+`git am` is still misdetected as a rebase (#3, out of scope here).
 
 ### 2. Diverged branches show only the ahead count — HIGH ✅ FIXED
 
@@ -160,7 +173,7 @@ can make the prompt lag. No timeout guard exists.
 
 ## Suggested fix order
 
-1. Subdir gitdir resolution (footgun #1)
+1. Subdir gitdir resolution (footgun #1) — ✅ done
 2. Show both ahead and behind (footgun #2) — ✅ done
 3. `rebase-apply/applying` stat to distinguish `git am` (footgun #3)
 4. Falsy-`0` guard on branch + argv flags (footgun #4)
