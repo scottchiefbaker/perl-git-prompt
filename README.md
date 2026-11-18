@@ -1,9 +1,9 @@
-perl-git-prompt
-===============
+🐙 perl-git-prompt
+==================
 
 Perl script to show current Git branch and changeset status in the prompt.
 
-## Usage
+## 📖 Usage
 
 Put the following in your `~/.bashrc`
 
@@ -15,8 +15,8 @@ if [[ ! "$PS1" =~ "$GIT_PROMPT_PATH" ]]; then
 fi
 ~~~
 
-Output:
--------
+🖥️ Output:
+----------
 The prompt looks like `Git Branch: (branch) [position dirty ⇄conflicts]`:
 
 * **(branch)** is the current branch. It turns green when clean, red when
@@ -29,8 +29,8 @@ The prompt looks like `Git Branch: (branch) [position dirty ⇄conflicts]`:
   red, and partly staged is yellow.
 * **⇄2** is the number of files with merge conflicts.
 
-Examples:
----------
+✨ Examples:
+------------
 ![Example Prompt](http://www.perturb.org/images/git-prompt-1.png)
 
 * You are on the **vader** branch.
@@ -43,8 +43,8 @@ Examples:
 * Your local repo is on the same commit as the remote
 * There are no files in the staging area
 
-Options:
---------
+⚙️ Options:
+-----------
 * `--json` prints the git status as JSON instead of the prompt, for use in
   scripts.
 * `--no-color` disables color.
@@ -54,7 +54,7 @@ Options:
 Color is on by default. Use `--no-color` when piping the output somewhere
 that should not receive escape codes.
 
-Note:
------
+📌 Note:
+--------
 This script assumes you have 256 color terminal support. If you still have
 a 16 color terminal no guarantees how this will look.
