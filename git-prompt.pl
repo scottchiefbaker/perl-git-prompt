@@ -129,25 +129,14 @@ if ($i && $i->{'branch'}) {
 
 # Set the foreground color
 sub color {
-	my $c    = shift() || "";
-	my $bold = shift() || "";
+	my $c = shift;
 
-	my $ret = '';
-
-	if ($bold eq 'bold') {
-		$ret = "\e[1m";
-	} else {
-		$ret = "\e[0m";
-	}
-
-	# Reset the color
+	# No color given: reset
 	if (!defined($c)) {
-		$ret = "\e[0m";
-	} else {
-		$ret .= "\e[38;5;${c}m";
+		return "\e[0m";
 	}
 
-	return $ret;
+	return "\e[0m\e[38;5;${c}m";
 }
 
 ###################################################
