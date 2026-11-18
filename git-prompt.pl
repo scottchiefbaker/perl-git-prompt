@@ -153,12 +153,10 @@ sub color {
 ###################################################
 
 sub is_git_dir {
-	# git branch is the fastest way to see if we're in a git dir or not
-	my $cmd = "git branch 2>&1 > /dev/null";
-	`$cmd`;
-
 	# If the exit code is 0 we're in a git enabled dir
-	if ($? == 0) {
+	my $ok = system("git rev-parse --is-inside-work-tree >/dev/null 2>&1");
+
+	if ($ok == 0) {
 		return 1;
 	} else {
 		return 0;
@@ -178,8 +176,7 @@ sub get_git_info {
 	$ret->{dirty}    = 0;
 
 	# Git status has all the data we'll need to get the parts
-	my $cmd = "2>/dev/null git status";
-	my $out = `$cmd`;
+	my $out = `git --no-optional-locks status 2>/dev/null`;
 
 	# Find the branch we're on
 	if ($out =~ /On branch (.+?)\n/) {
