@@ -17,7 +17,7 @@ binmode(STDOUT, ":utf8");
 # Put this in your ~/.bashrc to show git status in your prompt:
 #
 # GIT_PROMPT_PATH="$HOME/github/perl-git-prompt/git-prompt.pl"
-# if [[ ! "$PS1" =~ "$GIT_PROMPT_PATH" ]]; then
+# if [[ "$PS1" != *"$GIT_PROMPT_PATH"* ]]; then
 #     export PS1="\$($GIT_PROMPT_PATH)"$PS1
 # fi
 ################################################################
