@@ -178,6 +178,37 @@ sub run_script {
 	is($i->{merge_conflict}, 1, 'get_git_info: unmerged entry counted as merge_conflict');
 	is($i->{dirty}, 0, 'get_git_info: unmerged entries do not count toward dirty');
 
+	# Rebase in progress. Use a conflicting rebase so the state remains active
+	# until we inspect it. This exercises rebase-state detection, restoring the
+	# branch name from rebase-merge/head-name, and conflict reporting.
+	my $rebase = new_repo();
+	open $fh, '>', "$rebase/f.txt" or die; print $fh "base\n"; close $fh;
+	git($rebase, 'add', 'f.txt');
+	git($rebase, 'commit', '-q', '-m', 'base');
+	git($rebase, 'checkout', '-q', '-b', 'topic');
+	open $fh, '>', "$rebase/f.txt" or die; print $fh "topic\n"; close $fh;
+	git($rebase, 'commit', '-q', '-am', 'topic change');
+	git($rebase, 'checkout', '-q', 'master');
+	open $fh, '>', "$rebase/f.txt" or die; print $fh "master\n"; close $fh;
+	git($rebase, 'commit', '-q', '-am', 'master change');
+	`cd '$rebase' && git -c user.name=t -c user.email=t\@t rebase topic >/dev/null 2>&1`;
+	$i = in_dir($rebase, sub { get_git_info() });
+	is($i->{rebasing}, 1, 'get_git_info: detects rebase in progress');
+	is($i->{branch}, 'master', 'get_git_info: restores branch name during rebase');
+	is($i->{merge_conflict}, 1, 'get_git_info: reports conflicts during rebase');
+
+	# Rebase state detection must use the actual git dir from a subdirectory
+	# and from a linked worktree, not assume a .git directory in the CWD.
+	make_path("$rebase/subdir");
+	$i = in_dir("$rebase/subdir", sub { get_git_info() });
+	is($i->{rebasing}, 1, 'get_git_info: detects rebase from a subdirectory');
+
+	my $rebase_wt = tempdir(CLEANUP => 1) . "/rebase-wt";
+	my $wt_source = new_repo();
+	git($wt_source, 'worktree', 'add', '-q', $rebase_wt);
+	$i = in_dir($rebase_wt, sub { get_git_info() });
+	ok(!$i->{rebasing}, 'get_git_info: linked worktree without rebase is not rebasing');
+
 	# Ahead and behind of upstream, including diverged
 	my $up = tempdir(CLEANUP => 1) . "/up.git";
 	git(tempdir(CLEANUP => 1), 'init', '-q', '--bare', $up);
