@@ -19,7 +19,8 @@ and status for a bash `PS1`. It is the whole product.
 
 ## Commands
 
-- There is no build, test suite, linter, or CI. Verify by running the script.
+- There is no build, linter, or CI. Run the tests with `prove t/` (Test::More,
+  core perl; needs git on PATH). Also verify by running the script.
 - Syntax check: `perl -c git-prompt.pl`
 - Run the prompt: `perl git-prompt.pl` (`--no-color` and `--json` are options).
 - Check color escapes without a tty: `script -qc "perl git-prompt.pl" /dev/null | cat -v`
