@@ -47,101 +47,108 @@ my $RESET_COLOR   = color();    # Reset the color
 
 ###################################################################
 
-# Get the state of git in the current dir
-my $i = get_git_info();
-
-# If the user requests debug dump out the data structure
-if ($args->{debug}) {
-	kd($i);
+# Run the prompt when executed directly, but not when loaded by another script.
+if (!caller()) {
+	main();
 }
 
-# If they request JSON spit that out
-if ($args->{json}) {
-	require JSON::PP;
-	# Character-mode encode: encode_json() returns UTF-8 *bytes*, which the
-	# :utf8 layer on STDOUT would encode a second time. This returns characters
-	# and the layer encodes them exactly once.
-	print JSON::PP->new->encode($i) . "\n";
-	exit;
-}
+sub main {
+	# Get the state of git in the current dir
+	my $i = get_git_info();
 
-# If we're on a git enabled dir
-if ($i && $i->{'branch'}) {
-	print $PROMPT_COLOR . "Git Branch: ";
-
-	my $branch_color = '';
-	if ($i->{'merge_conflict'} || $i->{rebasing}) {
-		$branch_color = $MERGE_COLOR;
-	} elsif ($i->{'dirty'}) {
-		$branch_color = $DIRTY_COLOR;
-	} else {
-		$branch_color = $CLEAN_COLOR;
+	# If the user requests debug dump out the data structure
+	if ($args->{debug}) {
+		kd($i);
 	}
 
-	# Print out the name of the branch we're currently on
-	my $branch_name = $i->{'branch'};
-	print $PAREN_COLOR . "(" . $branch_color . $branch_name . $PAREN_COLOR . ") ";
-
-	# If we're ahead/behind of the remote OR there are pending files or conflicts.
-	# Conflicts have to be listed here too: unmerged entries do not count toward
-	# dirty, and without an upstream there is no position either.
-	if ($i->{'position'} || $i->{'dirty'} || $i->{'merge_conflict'}) {
-		# Open paren
-		print $BRACE_COLOR . "[";
-
-		# Ahead/Behind of the remote server. A diverged branch shows both
-		# counts, each in its own color: +2 in the ahead color, -3 in the
-		# behind color.
-		if ($i->{'position'}) {
-			if ($i->{'ahead'}) {
-				print $AHEAD_COLOR . "+" . $i->{'ahead'};
-			}
-
-			if ($i->{'behind'}) {
-				print $BEHIND_COLOR . ($i->{'ahead'} ? " " : "") . "-" . $i->{'behind'};
-			}
-		}
-
-		# If the repo is dirty AND we're ahead/behind put a space between the numbers
-		if ($i->{'dirty'} && $i->{'position'}) {
-			print " ";
-		}
-
-		# If there are pending files to be committed
-		#
-		# If none of the files are staged
-		if (($i->{'dirty'} >= 1) && ($i->{'staged'} == 0)) {
-			print $DIRTY_COLOR;
-		# If all the files are staged (and none have further unstaged edits)
-		} elsif ($i->{dirty} && ($i->{dirty} == $i->{staged}) && !$i->{unstaged}) {
-			print $CLEAN_COLOR;
-		# If some of the files are staged (but not all)
-		} elsif ($i->{dirty}) {
-			print $PENDING_COLOR;
-		}
-
-		# Print out the number of dirty files
-		if ($i->{dirty}) {
-			print $i->{'dirty'};
-		}
-
-		if ($i->{merge_conflict}) {
-			my $count = $i->{merge_conflict};
-
-			#my $merge_symbol = "\N{ALMOST EQUAL TO}";
-			my $merge_symbol = "\x{21C4}";
-
-			# Space it away from any numbers, unless it's alone in the bracket
-			my $sep = ($i->{'dirty'} || $i->{'position'}) ? " " : "";
-
-			print $MERGE_COLOR . $sep . $merge_symbol . $count;
-		}
-
-		# Close paren
-		print $BRACE_COLOR . "]";
+	# If they request JSON spit that out
+	if ($args->{json}) {
+		require JSON::PP;
+		# Character-mode encode: encode_json() returns UTF-8 *bytes*, which the
+		# :utf8 layer on STDOUT would encode a second time. This returns characters
+		# and the layer encodes them exactly once.
+		print JSON::PP->new->encode($i) . "\n";
+		exit;
 	}
 
-	print "\n" . $RESET_COLOR;
+	# If we're on a git enabled dir
+	if ($i && $i->{'branch'}) {
+		print $PROMPT_COLOR . "Git Branch: ";
+
+		my $branch_color = '';
+		if ($i->{'merge_conflict'} || $i->{rebasing}) {
+			$branch_color = $MERGE_COLOR;
+		} elsif ($i->{'dirty'}) {
+			$branch_color = $DIRTY_COLOR;
+		} else {
+			$branch_color = $CLEAN_COLOR;
+		}
+
+		# Print out the name of the branch we're currently on
+		my $branch_name = $i->{'branch'};
+		print $PAREN_COLOR . "(" . $branch_color . $branch_name . $PAREN_COLOR . ") ";
+
+		# If we're ahead/behind of the remote OR there are pending files or conflicts.
+		# Conflicts have to be listed here too: unmerged entries do not count toward
+		# dirty, and without an upstream there is no position either.
+		if ($i->{'position'} || $i->{'dirty'} || $i->{'merge_conflict'}) {
+			# Open paren
+			print $BRACE_COLOR . "[";
+
+			# Ahead/Behind of the remote server. A diverged branch shows both
+			# counts, each in its own color: +2 in the ahead color, -3 in the
+			# behind color.
+			if ($i->{'position'}) {
+				if ($i->{'ahead'}) {
+					print $AHEAD_COLOR . "+" . $i->{'ahead'};
+				}
+
+				if ($i->{'behind'}) {
+					print $BEHIND_COLOR . ($i->{'ahead'} ? " " : "") . "-" . $i->{'behind'};
+				}
+			}
+
+			# If the repo is dirty AND we're ahead/behind put a space between the numbers
+			if ($i->{'dirty'} && $i->{'position'}) {
+				print " ";
+			}
+
+			# If there are pending files to be committed
+			#
+			# If none of the files are staged
+			if (($i->{'dirty'} >= 1) && ($i->{'staged'} == 0)) {
+				print $DIRTY_COLOR;
+				# If all the files are staged (and none have further unstaged edits)
+			} elsif ($i->{dirty} && ($i->{dirty} == $i->{staged}) && !$i->{unstaged}) {
+				print $CLEAN_COLOR;
+				# If some of the files are staged (but not all)
+			} elsif ($i->{dirty}) {
+				print $PENDING_COLOR;
+			}
+
+			# Print out the number of dirty files
+			if ($i->{dirty}) {
+				print $i->{'dirty'};
+			}
+
+			if ($i->{merge_conflict}) {
+				my $count = $i->{merge_conflict};
+
+				#my $merge_symbol = "\N{ALMOST EQUAL TO}";
+				my $merge_symbol = "\x{21C4}";
+
+				# Space it away from any numbers, unless it's alone in the bracket
+				my $sep = ($i->{'dirty'} || $i->{'position'}) ? " " : "";
+
+				print $MERGE_COLOR . $sep . $merge_symbol . $count;
+			}
+
+			# Close paren
+			print $BRACE_COLOR . "]";
+		}
+
+		print "\n" . $RESET_COLOR;
+	}
 }
 
 # Set the foreground color. Each escape is wrapped in \x01/\x02 (readline's
@@ -385,3 +392,5 @@ BEGIN {
 		*kd = sub { print Data::Dumper::Dumper(\@_); die; };
 	}
 }
+
+1;
